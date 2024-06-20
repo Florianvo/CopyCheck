@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CopyCheck</title>
+    <!-- Bootstrap CSS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/favicon-32x32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/favicon-16x16.png') }}">
+    <link href="
+https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css
+" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='webfont/gt-flexa.css') }}" rel="stylesheet">
+<style>
+    /* General page styles */
+    body {
+        background-color: #1C4739;
+        color: #ffffff;
+        font-family: 'GT Flexa', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    p {
+        font-family: 'GT Flexa', sans-serif;
+        font-weight: 400;
+        line-height: 150%;
+    }
+
+    a {
+        color: #42DBA3;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    /* Input, Textarea and Select styles */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea,
+    select.form-select {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+        border: 3px solid #f3e6dc !important;
+        border-radius: 15px !important;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select.form-select:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 0.25rem rgba(66, 219, 164, 0.25) !important;
+        border-color: #42DBA3 !important;
+    }
+
+    /* Button styles */
+    .btn-primary {
+        background-color: #16382B;
+        border-color: #16382B;
+        padding: .75rem 1.5rem; /* Increased padding */
+        font-size: 1.1rem; /* Larger text */
+        font-weight: 800; /* Bold text */
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active,
+    .btn-primary:visited,
+    .btn-primary:disabled,
+    .btn-primary.active,
+    .btn-primary:not(:disabled):not(.disabled):active,
+    .btn-primary:not(:disabled):not(.disabled).active,
+    .show > .btn-primary.dropdown-toggle {
+        background-color: #42DBA3 !important;
+        border-color: #42DBA3 !important;
+    }
+
+    /* Placeholder styles */
+    ::placeholder {
+        color: #76907D !important;
+        opacity: 1;
+    }
+
+    .btn-info {
+        background-color: #1C4739 !important;
+        border-color: #1C4739 !important;
+    }
+
+    .btn-info:hover {
+        background-color: #16382B !important;
+        border-color: #16382B !important;
+    }
+
+
+    .btn-download {
+        padding: .5rem 1rem; /* Increased padding */
+        font-size: 1rem; /* Larger text */
+        font-weight: 600;
+    }
+
+    /* Loading icon styles */
+    .loading-icon {
+        width: 25px;
+        height: 25px;
+        display: none;
+    }
+
+    /* Audio player styles */
+    audio {
+        display: none;
+    }
+
+    .custom-audio-player {
+        height: 50px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 25px;
+        margin: 0.75rem 0;
+    }
+
+    /* Progress bar styles */
+    .progress {
+        position: relative;
+        height: 50px;
+        border-radius: 15px;
+        border: 5px solid #272727;
+        background-color: #e9ecef;
+        display: none;
+    }
+
+    #durationRange {
+        position: absolute;
+        height: 100%;
+        background-color: #16382B;
+    }
+
+    #targetDurationMarker {
+        position: absolute;
+        width: 10px;
+        height: 100%;
+        background-color: #42DBA3;
+    }
+
+    .duration-label {
+        position: absolute;
+        top: 8px;
+        color: #b3b3b3;
+        font-size: 1rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    /* Card styles */
+    .card {
+        background-color: #0D0D0D;
+        color: #ffffff;
+        border-radius: 15px;
+    }
+
+    #originalAudioCard, #spedUpAudioCard {
+        display: none;
+    }
+
+    /* Responsive label styles for mobile screens */
+    @media (max-width: 768px) {
+        .duration-label {
+            font-size: 0.9rem; /* Smaller font size on mobile */
+            top:9px;
+            color: #0D0D0D;
+        }
+    }
+
+    /* Remove bottom margin when collapse is not active */
+    .collapse:not(.show) {
+        margin-bottom: 0;
+    }
+
+    /* Remove padding from the card within the collapsible element when it's not shown */
+    .collapse:not(.show) .card-body {
+        padding: 0;
+    }
+
+    /* Footer */
+    .footer {
+    background-color: #091611; /* New background color */
+    color: #ffffff;
+    margin-top: auto; /* Push footer to the bottom */
+    }
+
+    .footer a {
+    color: #ffffff;
+    margin-left: 15px; /* Spacing between icons */
+    }
+
+    .footer a.social-icon {
+    font-size: 1.2em; /* Adjust icon size as needed */
+    }
+
+    .footer a:hover {
+    text-decoration: none;
+    color: #42DBA3; /* Color when hovering over the icon */
+    }
+</style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row align-items-center">
+        <div class="col-auto mr-auto">
+            <a href="https://lab3.amsterdam" alt="Lab&sup3; CopyCheck">
+                <picture>
+                    <source srcset="{{ url_for('static', filename='copycheck.webp') }}" type="image/webp">
+                    <source srcset="{{ url_for('static', filename='copycheck.png') }}" type="image/jpeg">
+                    <img src="{{ url_for('static', filename='copycheck.png') }}" alt="Lab&sup3; CopyCheck" width="120">
+                </picture>
+            </a>
+        </div>
+        <div class="col-auto">
+            <!-- Info Icon/Button that triggers the collapse -->
+            <button class="btn btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#infoCollapse" aria-expanded="false" aria-controls="infoCollapse">
+                <i class="bi bi-info-circle" style="color: #ffffff;"></i>
+            </button>
+        </div>
+    </div>
+    <!-- Collapsible Row of Text -->
+    <div class="row">
+        <div class="col">
+            <div class="collapse mt-2" id="infoCollapse">
+                <div class="card card-body" style="background-color: #16382B; color: #ffffff;">
+                    <p>
+                    CopyCheck is een experimentele tool bedoeld om copywriters een handje te helpen met A.I. Het is vaak lastig in te schatten hoe lang een geschreven tekst duurt wanneer deze wordt uitgesproken. Dat zorgt vaak voor te lange teksten in de opnamestudio en last-minute schrapwerk. CopyCheck helpt je dit te voorkomen door een geschatte tijdsduur te bieden voordat je de studio in gaat.
+                    </p><p>
+                    Houd er rekening mee dat de gegeven tijdsrange een benadering is; het is geen exacte wetenschap. We vragen om je e-mailadres om inzicht te krijgen in wie interesse heeft in onze tool. De ingevoerde tekst wordt naar de API van ElevenLabs doorgestuurd voor het genereren van de stem. Heb je feedback , vragen, of een goed idee? Neem contact op met <a href="mailto:florian@lab3.amsterdam">Florian</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form id="myForm" action="/generate" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="mt-3 mb-3">
+            <div class="textarea-container" style="position: relative;">
+                <textarea id="text" name="text" rows="5" cols="50" class="form-control" required
+                          placeholder="Voer hier je copy in." maxlength="5000"></textarea>
+                <div id="characterCount" style="position: absolute; bottom: 10px; right: 10px; font-size: smaller;
+                                                 color: gray;"></div>
+            </div>
+
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-lg-2 col-6">
+                <input type="number" name="target_duration" class="form-control" required placeholder="Lengte (sec)">
+            </div>
+            <div class="col-lg-2 col-6">
+                <select name="voice" class="form-select"required>
+                    <option value="f">Vrouw</option>
+                    <option value="m">Man</option>
+                </select>
+            </div>
+            <div class="col-lg-8 col-12">
+                <input type="email" name="email" class="form-control" required placeholder="Emailadres">
+            </div>
+        </div>
+        <div class="col text-center">
+        <button type="submit" class="btn btn-primary">
+            Check!
+            <img src="{{ url_for('static', filename='loading.gif') }}" class="loading-icon" id="loadingIcon" alt="Loading...">
+        </button>
+        </div>
+    </form>
+
+    <div id="result" class="mb-2 mt-3"></div>
+    <div class="mb-3">
+        <div class="progress">
+            <div id="durationRange" class="progress-bar bg-success" role="progressbar"></div>
+            <div id="targetDurationMarker"></div>
+            <span id="rangeStartLabel" class="duration-label"></span>
+            <span id="rangeEndLabel" class="duration-label"></span>
+        </div>
+    </div>
+
+
+    <div class="row mt-2">
+        <!-- Original audio card -->
+        <div class="col-md-6 mb-3" id="originalAudioCard">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-2" id="originalAudioLabel">VO aanbevolen lengte:</h5>
+                    <audio id="originalAudio" controls class="w-100 custom-audio-player">
+                        <source src="" type="audio/mp3">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="d-grid gap-2">
+                        <a href="" id="originalDownload" download class="btn btn-primary btn-download mx-auto mt-2">
+                            <i class="bi bi-download"></i> &nbsp; Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sped-up audio card -->
+        <div class="col-md-6 mb-3" id="spedUpAudioCard">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-2" id="spedUpAudioLabel">VO in ... seconden</h5>
+                    <audio id="spedUpAudio" controls class="w-100 custom-audio-player">
+                        <source src="" type="audio/mp3">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="d-grid gap-2">
+                        <a href="" id="spedUpDownload" download class="btn btn-primary btn-download mx-auto mt-2">
+                            <i class="bi bi-download"></i> &nbsp; Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="jumbotron text-center mt-3" style="background-color: #16382B; color: #ffffff; padding: 2rem 1rem; margin-bottom: 2rem; border-radius: 15px; display: none;" id="ctaJumbotron">
+        <h3>Copy gecheckt en klaar om op te nemen? </h3>
+        <p class="col-lg-8 mx-auto fs-5">Wij kunnen je helpen met het vinden van een (echte) stem, muziekproductie, sounddesign en mixage. Neem een kijkje op <a href="https://lab3.amsterdam">onze website</a>, of neem direct contact op via <a href="mailto:info@lab3.amsterdam">info@lab3.amsterdam</a>.</p>
+    </div>
+
+</div>
+
+
+</div>
+
+<footer class="footer mt-auto py-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-9">
+        <span>CopyCheck by &nbsp;
+        <a href="https://lab3.amsterdam" alt="Lab&sup3; CopyCheck">
+                <picture>
+                    <source srcset="{{ url_for('static', filename='logo.webp') }}" type="image/webp">
+                    <source srcset="{{ url_for('static', filename='logo.png') }}" type="image/png">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Lab&sup3;" width="60">
+                </picture>
+        </a>
+        </span>
+      </div>
+      <div class="col-md-3 text-md-right">
+        <a href="https://lab3.amsterdam" target="_blank"><i class="bi bi-link-45deg"></i></a>
+        <a href="https://www.linkedin.com/company/lab3amsterdam" class="social-icon" target="_blank"><i class="bi bi-linkedin"></i></a>
+        <a href="https://www.facebook.com/lab3amsterdam" class="social-icon" target="_blank"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/lab3.amsterdam" class="social-icon" target="_blank"><i class="bi bi-instagram"></i></a>
+        <a href="mailto:info@lab3.amsterdam" class="social-icon"><i class="bi bi-envelope"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+
+    $('#myForm').on('submit', function(e) {
+        e.preventDefault();  // Prevent the default form submission behavior
+        $('#result').empty(); // Clear any previous results
+        $.ajax({
+            url: '/generate',
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            beforeSend: function() {
+                $('#loadingIcon').show();
+                $('#originalAudio, #spedUpAudio').hide();  // Hide audio elements
+                $('#originalAudioCard').fadeOut("slow");
+                $('#spedUpAudioCard').fadeOut("slow");
+                $('.progress').hide(); // Hide the progress bar
+                $('button[type="submit"]').prop('disabled', true); // Disable the submit button to prevent multiple submits
+            },
+            complete: function() {
+                $('#loadingIcon').hide(); // Hide the loading icon
+                $('button[type="submit"]').prop('disabled', false); // Re-enable the submit button
+            },
+            success: function(data) {
+                let [minDuration, maxDuration] = data.rec_duration_range.split('-').map(Number);
+                let targetDurationBar = parseInt($("input[name='target_duration']").val());
+                let extendedMin = Math.min(minDuration - 3, targetDurationBar);
+                let extendedMax = Math.max(maxDuration + 3, targetDurationBar);
+
+                let totalRange = extendedMax - extendedMin;
+                let greenRangeWidthPercent = ((maxDuration - minDuration) / totalRange) * 100;
+                let greenRangeStartPercent = ((minDuration - extendedMin) / totalRange) * 100;
+                let markerPositionPercent = ((targetDurationBar - extendedMin) / totalRange) * 100;
+
+                let rangeEndPositionPercent = greenRangeStartPercent + greenRangeWidthPercent;
+
+                // Define the colors
+                const inRangeColor = '#42DBA3'; // Green
+                const outOfRangeColor = '#F9515B'; // Red
+
+                // Check if the target duration is within the range and assign the appropriate color
+                let markerColor = (targetDurationBar >= minDuration && targetDurationBar <= maxDuration) ? inRangeColor : outOfRangeColor;
+
+                $('#loadingIcon').hide();
+                $('#result').html('<h4>De aanbevolen spotlengte voor deze copy is <strong style="color:' + markerColor +'">' + data.rec_duration_range + ' seconden</strong>.</h4>');
+
+                // Update the src for original audio if present
+                if (data.original) {
+                    $('#originalAudioCard').fadeIn("slow");
+                    $('#originalAudio').show().find('source').attr('src', data.original);
+                    $('#originalAudio')[0].load();
+                    $('#originalDownload').attr('href', data.original); // Set the href for the download button
+                }
+
+                $('.progress').show();
+
+                if (data.sped_up_path) { // Check if the sped-up file is available
+                    var targetDuration = $('input[name="target_duration"]').val(); // Get the target duration from the form
+                    $('#spedUpAudioCard').fadeIn("slow");
+                    $('#spedUpAudio').show().find('source').attr('src', data.sped_up_path);
+                    $('#spedUpDownload').attr('href', data.sped_up_path); // Set the href for the download button
+                    $('#spedUpAudio')[0].load();
+                    $('#spedUpAudioLabel').text('VO in ' + targetDuration + ' seconden:').show(); // Update label text with target duration
+                }
+
+                // Update the progress bar and marker positions
+                $('#durationRange').css({
+                    'left': greenRangeStartPercent + '%',
+                    'width': greenRangeWidthPercent + '%'
+                });
+
+                // Set the left position for the rangeStartLabel to be at the start of the green range
+                $('#rangeStartLabel').css('left', greenRangeStartPercent - 5 + '%').text(minDuration + ' sec');
+
+                // Calculate the end position for the rangeEndLabel and set it
+                $('#rangeEndLabel').css('left', rangeEndPositionPercent + 2 + '%').text(maxDuration + ' sec');
+
+                // Apply the color to the target duration marker
+                $('#targetDurationMarker').css({
+                    'left': '0%',
+                    'background-color': markerColor
+                }).animate({ left: markerPositionPercent + '%' }, 1000);
+
+                // Make sure the labels are displayed
+                $('.duration-label').show();
+
+            },
+            error: function() {
+                // Handle any errors
+            }
+        });
+    });
+
+    document.getElementById('myForm').addEventListener('submit', function() {
+        document.getElementById('loadingIcon').style.display = 'inline';  // Show loading icon
+        document.getElementById('originalAudio').style.display = 'none';  // Hide audio elements
+        document.getElementById('spedUpAudio').style.display = 'none';  // Hide audio elements
+    });
+
+$(document).ready(function() {
+    function updateCharacterCount() {
+        var textLength = $('#text').val().length;
+        var maxChar = 5000;
+        $('#characterCount').text(textLength + ' / ' + maxChar);
+    }
+
+    // Initialize the character count on page load
+    updateCharacterCount();
+
+    // Update the character count on input
+    $('#text').on('input', function() {
+        updateCharacterCount();
+    });
+
+});
+
+$(document).ready(function() {
+    // Display the jumbotron after a 3-second delay
+    setTimeout(function() {
+        $('#ctaJumbotron').fadeIn("slow");
+    }, 5000); // 5000 milliseconds = 3 seconds
+});
+</script>
+
+</body>
+</html>
